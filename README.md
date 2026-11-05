@@ -49,6 +49,13 @@ Hosted (one server, many buyers): `verifactu-mcp --http` or the Dockerfile; each
 Environment: `KEYFLINT_LICENSE`, `KEYFLINT_URL`, `KEYFLINT_PUBLIC_KEYS`, `KEYFLINT_CHECKOUT_URL`,
 `VERIFACTU_PRICES` (e.g. `validate_invoice_chain=5,build_facturae=4`), `VERIFACTU_MAX_BYTES` (default 10 MB).
 
+## Visual cards (MCP Apps)
+
+In Claude, ChatGPT, VS Code and Goose every paid tool and `credits_balance` renders as an interactive card in the
+chat: credit balance with a refill bar and a buy button, or a result summary (key figures, issues, table preview and
+credits charged). It is the `ui://verifactu/card.html` resource, self-contained with no network access. Other clients
+keep getting the same JSON as before.
+
 ## Legal status (checked 2026-11-05)
 
 - VERI\*FACTU (RD 1007/2023, Orden HAC/1177/2024; dates from RD-ley 15/2025): **1 Jan 2027** for corporate

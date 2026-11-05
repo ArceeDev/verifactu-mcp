@@ -24,6 +24,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 
 from . import __version__, calendar, facturae, huella, ids, qr
+from . import apps
 from .billing import Billing
 
 DEFAULT_PRICES = {"verifactu_hash": 1, "validate_invoice_chain": 3, "validate_verifactu_xml": 3,
@@ -66,6 +67,11 @@ mcp = MCPServer(
 )
 
 
+UI = apps.ui_meta("verifactu")
+apps.register(mcp, slug="verifactu", name="VeriFactu", icon="shield", version=__version__, lang="es",
+              buy_url=lambda: billing.checkout_url,
+              labels={"verifactu_hash": "Huella VERI*FACTU", "validate_invoice_chain": "Cadena de facturas", "validate_verifactu_xml": "XML VERI*FACTU", "generate_verifactu_qr": "QR tributario", "build_facturae": "Factura Facturae", "validate_facturae": "Validación Facturae", "credits_balance": "Saldo de créditos"})
+
 @contextmanager
 def _user_errors() -> Iterator[None]:
     try:
@@ -106,7 +112,7 @@ async def _charged(ctx: Context, tool: str) -> dict[str, Any]:
     return _note(receipt, PRICES[tool])
 
 
-@mcp.tool(annotations=LOCAL)
+@mcp.tool(annotations=LOCAL, meta=UI)
 async def verifactu_hash(ctx: Context, record: dict[str, Any], previous_huella: str = "") -> dict[str, Any]:
     """Compute the VERI*FACTU fingerprint (huella, SHA-256) of one invoicing record.
 
@@ -129,7 +135,7 @@ async def verifactu_hash(ctx: Context, record: dict[str, Any], previous_huella: 
             "issues": issues, "billing": await _charged(ctx, "verifactu_hash")}
 
 
-@mcp.tool(annotations=LOCAL)
+@mcp.tool(annotations=LOCAL, meta=UI)
 async def validate_invoice_chain(ctx: Context, records: list[dict[str, Any]],
                                  continues_from: str = "") -> dict[str, Any]:
     """Audit a VERI*FACTU chain of records (in generation order) given as JSON objects.
@@ -169,7 +175,7 @@ def _lr_schema() -> etree.XMLSchema:
         return etree.XMLSchema(etree.parse(str(p)))
 
 
-@mcp.tool(annotations=LOCAL)
+@mcp.tool(annotations=LOCAL, meta=UI)
 async def validate_verifactu_xml(ctx: Context, content: str = "", content_base64: str = "",
                                  continues_from: str = "") -> dict[str, Any]:
     """Audit VERI*FACTU XML exported by an invoicing program (RegFactuSistemaFacturacion, a SOAP envelope, or any
@@ -193,7 +199,7 @@ async def validate_verifactu_xml(ctx: Context, content: str = "", content_base64
             "billing": await _charged(ctx, "validate_verifactu_xml")}
 
 
-@mcp.tool(annotations=LOCAL)
+@mcp.tool(annotations=LOCAL, meta=UI)
 async def generate_verifactu_qr(ctx: Context, nif: str, numserie: str, fecha: str, importe: str,
                                 verifactu: bool = True, environment: str = "produccion", size_px: int = 300,
                                 image_format: str = "png") -> dict[str, Any]:
@@ -220,7 +226,7 @@ async def generate_verifactu_qr(ctx: Context, nif: str, numserie: str, fecha: st
     return {"url": url, **img, "print_rules": rules, "billing": await _charged(ctx, "generate_verifactu_qr")}
 
 
-@mcp.tool(annotations=LOCAL)
+@mcp.tool(annotations=LOCAL, meta=UI)
 async def build_facturae(ctx: Context, invoice: dict[str, Any]) -> dict[str, Any]:
     """Build a Facturae 3.2.2 invoice (XML) from plain data, with totals computed and the official XSD checked.
 
@@ -253,7 +259,7 @@ async def build_facturae(ctx: Context, invoice: dict[str, Any]) -> dict[str, Any
             "billing": await _charged(ctx, "build_facturae")}
 
 
-@mcp.tool(annotations=LOCAL)
+@mcp.tool(annotations=LOCAL, meta=UI)
 async def validate_facturae(ctx: Context, content: str = "", content_base64: str = "") -> dict[str, Any]:
     """Validate a Facturae 3.2.2 file (.xml or signed .xsig) before sending it to FACe or a client.
 
@@ -296,7 +302,7 @@ def pricing() -> dict[str, Any]:
             "buy_credits": billing.checkout_url or "Set KEYFLINT_CHECKOUT_URL"}
 
 
-@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False), meta=UI)
 async def credits_balance(ctx: Context) -> dict[str, Any]:
     """Remaining credits on your KeyFlint license. Free."""
     return await billing.balance(_headers(ctx))
