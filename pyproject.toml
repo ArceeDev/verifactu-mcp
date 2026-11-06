@@ -3,12 +3,13 @@ requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "verifactu-mcp"
+name = "verifactu-keyflint-mcp"
 version = "0.1.0"
 description = "MCP server for Spanish invoicing compliance: audit VERI*FACTU fingerprint (huella) chains, generate the AEAT tax QR, and build/validate Facturae 3.2.2 invoices against the official XSD. Billed per call with KeyFlint credits."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = "BUSL-1.1"
+license-files = ["LICENSE"]
 authors = [{ name = "ArceeDev" }]
 keywords = ["mcp", "verifactu", "veri-factu", "aeat", "huella", "qr-tributario", "facturae", "face", "factura-electronica", "gestoria", "spain"]
 dependencies = [
@@ -25,7 +26,7 @@ test = ["pytest>=8", "pytest-asyncio>=0.23"]
 verifactu-mcp = "verifactu_mcp.server:main"
 
 [project.urls]
-Homepage = "https://github.com/ArceeDev/verifactu-mcp"
+Homepage = "https://mcp.keyflint.dev"
 Source = "https://github.com/ArceeDev/verifactu-mcp"
 
 [tool.setuptools.packages.find]

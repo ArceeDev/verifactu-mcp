@@ -1,5 +1,7 @@
 # verifactu-mcp
 
+On PyPI as `verifactu-keyflint-mcp` (the name `verifactu-mcp` belongs to another project).
+
 MCP server for Spanish invoicing compliance, built for AI agents working for gestorías, accountants and
 invoicing-software teams. Offline and stateless: nothing is stored and nothing is sent to the AEAT.
 
@@ -37,8 +39,8 @@ Claude Desktop / Claude Code / Cursor (`mcpServers` entry):
 {
   "verifactu": {
     "command": "uvx",
-    "args": ["--from", "git+https://github.com/ArceeDev/verifactu-mcp", "verifactu-mcp"],
-    "env": { "KEYFLINT_LICENSE": "LIC-...", "KEYFLINT_URL": "https://licenses.keyflint.dev" }
+    "args": ["--from", "verifactu-keyflint-mcp", "verifactu-mcp"],
+    "env": { "KEYFLINT_LICENSE": "LIC-..." }
   }
 }
 ```
@@ -91,4 +93,4 @@ pip install -e '.[test]'
 pytest -q
 ```
 
-MIT licensed. The bundled XSD files belong to their publishers (AEAT, Ministerio de Hacienda, W3C).
+Business Source License 1.1. Source available; production use needs a KeyFlint license (or must be non-commercial). Each version becomes Apache 2.0 four years after release. See [LICENSE](LICENSE). The bundled XSD files belong to their publishers (AEAT, Ministerio de Hacienda, W3C).
