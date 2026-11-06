@@ -1,5 +1,7 @@
 # verifactu-mcp
 
+<!-- mcp-name: io.github.ArceeDev/verifactu-mcp -->
+
 On PyPI as `verifactu-keyflint-mcp` (the name `verifactu-mcp` belongs to another project).
 
 MCP server for Spanish invoicing compliance, built for AI agents working for gestorías, accountants and
