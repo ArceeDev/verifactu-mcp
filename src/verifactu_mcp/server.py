@@ -112,7 +112,7 @@ async def _charged(ctx: Context, tool: str) -> dict[str, Any]:
     return _note(receipt, PRICES[tool])
 
 
-@mcp.tool(annotations=LOCAL, meta=UI)
+@mcp.tool(title="Compute VeriFactu record hash", annotations=LOCAL, meta=UI)
 async def verifactu_hash(ctx: Context, record: dict[str, Any], previous_huella: str = "") -> dict[str, Any]:
     """Compute the VERI*FACTU fingerprint (huella, SHA-256) of one invoicing record.
 
@@ -135,7 +135,7 @@ async def verifactu_hash(ctx: Context, record: dict[str, Any], previous_huella: 
             "issues": issues, "billing": await _charged(ctx, "verifactu_hash")}
 
 
-@mcp.tool(annotations=LOCAL, meta=UI)
+@mcp.tool(title="Validate VeriFactu invoice chain", annotations=LOCAL, meta=UI)
 async def validate_invoice_chain(ctx: Context, records: list[dict[str, Any]],
                                  continues_from: str = "") -> dict[str, Any]:
     """Audit a VERI*FACTU chain of records (in generation order) given as JSON objects.
@@ -175,7 +175,7 @@ def _lr_schema() -> etree.XMLSchema:
         return etree.XMLSchema(etree.parse(str(p)))
 
 
-@mcp.tool(annotations=LOCAL, meta=UI)
+@mcp.tool(title="Validate VeriFactu XML", annotations=LOCAL, meta=UI)
 async def validate_verifactu_xml(ctx: Context, content: str = "", content_base64: str = "",
                                  continues_from: str = "") -> dict[str, Any]:
     """Audit VERI*FACTU XML exported by an invoicing program (RegFactuSistemaFacturacion, a SOAP envelope, or any
@@ -199,7 +199,7 @@ async def validate_verifactu_xml(ctx: Context, content: str = "", content_base64
             "billing": await _charged(ctx, "validate_verifactu_xml")}
 
 
-@mcp.tool(annotations=LOCAL, meta=UI)
+@mcp.tool(title="Generate VeriFactu QR code", annotations=LOCAL, meta=UI)
 async def generate_verifactu_qr(ctx: Context, nif: str, numserie: str, fecha: str, importe: str,
                                 verifactu: bool = True, environment: str = "produccion", size_px: int = 300,
                                 image_format: str = "png") -> dict[str, Any]:
@@ -226,7 +226,7 @@ async def generate_verifactu_qr(ctx: Context, nif: str, numserie: str, fecha: st
     return {"url": url, **img, "print_rules": rules, "billing": await _charged(ctx, "generate_verifactu_qr")}
 
 
-@mcp.tool(annotations=LOCAL, meta=UI)
+@mcp.tool(title="Build Facturae e-invoice", annotations=LOCAL, meta=UI)
 async def build_facturae(ctx: Context, invoice: dict[str, Any]) -> dict[str, Any]:
     """Build a Facturae 3.2.2 invoice (XML) from plain data, with totals computed and the official XSD checked.
 
@@ -259,7 +259,7 @@ async def build_facturae(ctx: Context, invoice: dict[str, Any]) -> dict[str, Any
             "billing": await _charged(ctx, "build_facturae")}
 
 
-@mcp.tool(annotations=LOCAL, meta=UI)
+@mcp.tool(title="Validate Facturae e-invoice", annotations=LOCAL, meta=UI)
 async def validate_facturae(ctx: Context, content: str = "", content_base64: str = "") -> dict[str, Any]:
     """Validate a Facturae 3.2.2 file (.xml or signed .xsig) before sending it to FACe or a client.
 
@@ -274,26 +274,26 @@ async def validate_facturae(ctx: Context, content: str = "", content_base64: str
     return {**report, "billing": await _charged(ctx, "validate_facturae")}
 
 
-@mcp.tool(annotations=LOCAL)
+@mcp.tool(title="Check VeriFactu QR URL", annotations=LOCAL)
 def check_qr_url(url: str) -> dict[str, Any]:
     """Check a tax QR URL read from an invoice: official AEAT host, path, parameters and formats. Free."""
     return qr.parse_url(url)
 
 
-@mcp.tool(annotations=LOCAL)
+@mcp.tool(title="Validate Spanish tax ID (NIF)", annotations=LOCAL)
 def validate_nif(nif: str) -> dict[str, Any]:
     """Check a Spanish NIF / NIE / CIF control character. Free."""
     return ids.validate_nif(nif)
 
 
-@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
+@mcp.tool(title="Show VeriFactu deadlines", annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
 def verifactu_calendar() -> dict[str, Any]:
     """Legal deadlines for VERI*FACTU and mandatory B2B e-invoicing in Spain, with sources and what is still
     pending publication. Free."""
     return calendar.CALENDAR
 
 
-@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
+@mcp.tool(title="Show tool prices", annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
 def pricing() -> dict[str, Any]:
     """Credit price of each tool and where to buy credits. Free."""
     free = {k: 0 for k in ("check_qr_url", "validate_nif", "verifactu_calendar")}
@@ -302,7 +302,7 @@ def pricing() -> dict[str, Any]:
             "buy_credits": billing.checkout_url or "Set KEYFLINT_CHECKOUT_URL"}
 
 
-@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False), meta=UI)
+@mcp.tool(title="Check credit balance", annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False), meta=UI)
 async def credits_balance(ctx: Context) -> dict[str, Any]:
     """Remaining credits on your KeyFlint license. Free."""
     return await billing.balance(_headers(ctx))
