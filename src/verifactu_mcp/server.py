@@ -106,8 +106,8 @@ def _bytes(content: str, content_base64: str) -> bytes:
     return raw
 
 
-async def _charged(ctx: Context, tool: str) -> dict[str, Any]:
-    async with billing.charge(PRICES[tool], tool, _headers(ctx)) as receipt:
+async def _charged(ctx: Context, tool: str, inputs: dict[str, Any]) -> dict[str, Any]:
+    async with billing.charge(PRICES[tool], tool, _headers(ctx), inputs=inputs) as receipt:
         pass
     return _note(receipt, PRICES[tool])
 
@@ -132,7 +132,7 @@ async def verifactu_hash(ctx: Context, record: dict[str, Any], previous_huella: 
         out = huella.compute(rec, previous_huella.strip().upper())
     billing.client(_headers(ctx)).check()
     return {**out, "tipo": rec["TipoRegistro"], "valid": not any(i["level"] == "error" for i in issues),
-            "issues": issues, "billing": await _charged(ctx, "verifactu_hash")}
+            "issues": issues, "billing": await _charged(ctx, "verifactu_hash", locals())}
 
 
 @mcp.tool(title="Validate VeriFactu invoice chain", annotations=LOCAL, meta=UI)
@@ -154,7 +154,7 @@ async def validate_invoice_chain(ctx: Context, records: list[dict[str, Any]],
         billing.client(_headers(ctx)).check()
         report = await asyncio.to_thread(huella.validate_chain, records, continues_from)
     report["results"] = report["results"][:PREVIEW]
-    return {**report, "billing": await _charged(ctx, "validate_invoice_chain")}
+    return {**report, "billing": await _charged(ctx, "validate_invoice_chain", locals())}
 
 
 def _xsd_check(root: Any) -> tuple[bool | None, list[str]]:
@@ -196,7 +196,7 @@ async def validate_verifactu_xml(ctx: Context, content: str = "", content_base64
         report["valid"] = False
     report["results"] = report["results"][:PREVIEW]
     return {**report, "schema_valid": xsd_ok, "schema_errors": xsd_errors,
-            "billing": await _charged(ctx, "validate_verifactu_xml")}
+            "billing": await _charged(ctx, "validate_verifactu_xml", locals())}
 
 
 @mcp.tool(title="Generate VeriFactu QR code", annotations=LOCAL, meta=UI)
@@ -223,7 +223,7 @@ async def generate_verifactu_qr(ctx: Context, nif: str, numserie: str, fecha: st
     rules = dict(qr.PRINT)
     if not verifactu:
         rules.pop("leyenda_verifactu")
-    return {"url": url, **img, "print_rules": rules, "billing": await _charged(ctx, "generate_verifactu_qr")}
+    return {"url": url, **img, "print_rules": rules, "billing": await _charged(ctx, "generate_verifactu_qr", locals())}
 
 
 @mcp.tool(title="Build Facturae e-invoice", annotations=LOCAL, meta=UI)
@@ -256,7 +256,7 @@ async def build_facturae(ctx: Context, invoice: dict[str, Any]) -> dict[str, Any
     name = f"{(invoice.get('series') or '')}{invoice.get('number')}".replace("/", "-")
     return {**out, "filename": f"facturae_{name}.xml",
             "xml_base64": base64.b64encode(out["xml"].encode("utf-8")).decode(),
-            "billing": await _charged(ctx, "build_facturae")}
+            "billing": await _charged(ctx, "build_facturae", locals())}
 
 
 @mcp.tool(title="Validate Facturae e-invoice", annotations=LOCAL, meta=UI)
@@ -271,7 +271,7 @@ async def validate_facturae(ctx: Context, content: str = "", content_base64: str
         raw = _bytes(content, content_base64)
         report = await asyncio.to_thread(facturae.validate, raw)
     billing.client(_headers(ctx)).check()
-    return {**report, "billing": await _charged(ctx, "validate_facturae")}
+    return {**report, "billing": await _charged(ctx, "validate_facturae", locals())}
 
 
 @mcp.tool(title="Check VeriFactu QR URL", annotations=LOCAL)
