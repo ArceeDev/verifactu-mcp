@@ -3,7 +3,7 @@
   "manifest_version": "0.4",
   "name": "verifactu-mcp",
   "display_name": "VeriFactu",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Audita cadenas de huellas VERI*FACTU, genera el QR tributario de la AEAT y crea/valida Facturae 3.2.2. Pago por uso con créditos KeyFlint.",
   "long_description": "Calcula y audita la huella encadenada de VERI*FACTU, valida el XML de registros, genera el QR tributario y construye o valida facturas Facturae 3.2.2 contra el XSD oficial. Cada llamada descuenta créditos de tu licencia KeyFlint; pricing, credits_balance y las utilidades gratuitas no cobran.",
   "author": {
