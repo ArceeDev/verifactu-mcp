@@ -3,7 +3,7 @@
   "name": "io.github.ArceeDev/verifactu-mcp",
   "title": "VeriFactu",
   "description": "Audit VERI*FACTU hash chains, build the AEAT tax QR, build and validate Facturae 3.2.2 invoices.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "websiteUrl": "https://mcp.keyflint.dev",
   "repository": {
     "url": "https://github.com/ArceeDev/verifactu-mcp",
@@ -14,7 +14,7 @@
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "verifactu-keyflint-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
       },

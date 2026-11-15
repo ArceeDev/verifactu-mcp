@@ -143,6 +143,7 @@ async def test_free_tools(server):
 async def test_paywall_when_out_of_credits(gateway, monkeypatch):
     lic = gateway["issue"](tier="community")  # 25 credits
     _env(monkeypatch, gateway, lic["license_key"])
+    monkeypatch.setattr(importlib.import_module("verifactu_mcp.billing"), "DEDUP_TTL", 0.0)  # distinct calls
     monkeypatch.setenv("VERIFACTU_PRICES", "validate_invoice_chain=20")
     import verifactu_mcp.server as srv
 
@@ -176,3 +177,45 @@ async def test_hosted_requires_license_header(gateway, license_, monkeypatch):
         srv.billing.client(None)
     assert "Bearer" in str(exc.value)
     assert srv.billing.client({"Authorization": f"Bearer {license_['license_key']}"}) is not None
+
+
+
+async def test_duplicate_call_same_inputs_charges_once(server):
+    """A client retry (same tool, same inputs) inside the dedupe window replays the debit."""
+    price = server.PRICES["verifactu_hash"]
+    before = await balance(server)
+    args = dict(record=R1)
+    err1, first, t1 = await call(server, "verifactu_hash", **args)
+    err2, second, t2 = await call(server, "verifactu_hash", **args)
+    assert not err1 and not err2, (t1, t2)
+    assert await balance(server) == before - price
+
+
+async def test_duplicate_call_after_window_is_charged(server, monkeypatch):
+    monkeypatch.setattr(importlib.import_module("verifactu_mcp.billing"), "DEDUP_TTL", 0.0)
+    price = server.PRICES["verifactu_hash"]
+    before = await balance(server)
+    args = dict(record=R1)
+    for _ in range(2):
+        err, _, text = await call(server, "verifactu_hash", **args)
+        assert not err, text
+    assert await balance(server) == before - 2 * price
+
+
+async def test_retry_after_refunded_failure_is_billed_once(server):
+    b = server.billing
+    before = await balance(server)
+    inputs = {"content": "x"}
+    with pytest.raises(RuntimeError):
+        async with b.charge(3, "verifactu_hash", inputs=inputs):
+            raise RuntimeError("tool body failed")
+    assert await balance(server) == before  # refunded
+    async with b.charge(3, "verifactu_hash", inputs=inputs) as receipt:
+        assert not receipt.get("is_cached")
+    assert await balance(server) == before - 3
+    # A failing replay of a paid call does not refund the paid one.
+    with pytest.raises(RuntimeError):
+        async with b.charge(3, "verifactu_hash", inputs=inputs) as receipt:
+            assert receipt.get("is_cached")
+            raise RuntimeError("retry failed")
+    assert await balance(server) == before - 3
